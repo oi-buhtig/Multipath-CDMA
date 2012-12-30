@@ -1,5 +1,7 @@
 #include "wrappers.h"
 #include <fstream>
+#include <cstdlib>
+#include <iostream>
 
 vector<int> fDSQPSKDemodulator(vector<int> symbolsIn,
 	vector<int> GoldSeq, int phi)
@@ -42,30 +44,37 @@ struct fImageSourceStruct fImageSource(string filename, int P)
 	struct fImageSourceStruct imageSource;
 
 	ifstream file;
-	file.open(filename);
-	vector<char> fileContent;
-	char * s = new char[1];
-
+	file.open((char *)filename.c_str());
+	int bufferSize = P/8;
+	char * buffer = new char[bufferSize];
+	int i = 0;
 	// read file
 	while (!file.eof())
 	{
-		file.read(s, 1);
-		fileContent.push_back(*s);
+		file >> buffer[i++];
+		if (i >= bufferSize) break;
 	}
 
-	// decompose into single bits
-	int fileLength = fileContent.size();
-	imageSource.bitsOut.resize(fileLength * 8);
+	for (; i < bufferSize; i++)
+		buffer[i] = 0;
 
-	for (int i = 0; i < fileLength; i++)
+	// decompose into single bits
+	imageSource.bitsOut.resize(P);
+
+
+	for (int i = 0; i < bufferSize; i++)
 	{
-		int tmp = fileContent[i];
+		int tmp = (int)buffer[i];
 		for (int j = 0; j < 8; j++)
 		{
 			imageSource.bitsOut[i*8+j] = tmp & 1; //extract last bit
-			tmp >> 1;
+			tmp = tmp >> 1;
 		}
 	}
+
+	if (P > 8*bufferSize)
+		for (int i = 8*bufferSize; i < P; i++)
+			imageSource.bitsOut[i] = 0;
 
 	/*
 	Since it is not possible to read the x, y from pure RGB-data
@@ -73,7 +82,6 @@ struct fImageSourceStruct fImageSource(string filename, int P)
 	*/
 	imageSource.x = 0;
 	imageSource.y = 0;
-	delete s;
 	return imageSource;
 }
 
