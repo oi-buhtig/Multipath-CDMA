@@ -31,4 +31,20 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 	vector<int> beta, vector<struct DOAStruct> DOA, double SNR,
 	vector<vector<double> > array);
 
-void fImageSink();
+void fImageSink(vector<int> bitsIn, int Q, int x, int y);
+
+struct fImageSourceStruct
+{
+	vector<int> bitsOut;
+	int x;
+	int y;
+};
+
+struct fImageSourceStruct fImageSource(string filename, int P);
+
+vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
+	vector<int> goldseq, int phi);
+
+vector<int> fGoldSeq(vector<int> mseq1, vector<int> mseq2, int shift);
+
+vector<int> fMSeqGen(vector<int> coeffs);
