@@ -17,7 +17,7 @@ struct fChannelEstimationStruct
 };
 
 struct fChannelEstimationStruct fChannelEstimation(
-	vector<complex<double>> symbolsIn, vector<int>	goldseq);
+	vector<complex<double> > symbolsIn, vector<int>	goldseq);
 
 
 struct DOAStruct
@@ -26,9 +26,9 @@ struct DOAStruct
 	int elevation;
 };
 
-vector<vector<complex<double>>> fChannel(vector<int> paths,
-	vector<vector<complex<int>>> symbolsIn, vector<int> delay,
+vector<vector<complex<double> > > fChannel(vector<int> paths,
+	vector<vector<complex<int> > > symbolsIn, vector<int> delay,
 	vector<int> beta, vector<struct DOAStruct> DOA, double SNR,
-	vector<vector<double>> array);
+	vector<vector<double> > array);
 
 void fImageSink();
