@@ -1,4 +1,5 @@
 #include "wrappers.h"
+#include <fstream>
 
 vector<int> fDSQPSKDemodulator(vector<int> symbolsIn,
 	vector<int> GoldSeq, int phi)
@@ -39,6 +40,40 @@ void fImageSink(vector<int> bitsIn, int Q, int x, int y)
 struct fImageSourceStruct fImageSource(string filename, int P)
 {
 	struct fImageSourceStruct imageSource;
+
+	ifstream file;
+	file.open(filename);
+	vector<char> fileContent;
+	char * s = new char[1];
+
+	// read file
+	while (!file.eof())
+	{
+		file.read(s, 1);
+		fileContent.push_back(*s);
+	}
+
+	// decompose into single bits
+	int fileLength = fileContent.size();
+	imageSource.bitsOut.resize(fileLength * 8);
+
+	for (int i = 0; i < fileLength; i++)
+	{
+		int tmp = fileContent[i];
+		for (int j = 0; j < 8; j++)
+		{
+			imageSource.bitsOut[i*8+j] = tmp & 1; //extract last bit
+			tmp >> 1;
+		}
+	}
+
+	/*
+	Since it is not possible to read the x, y from pure RGB-data
+	they're set to zero.
+	*/
+	imageSource.x = 0;
+	imageSource.y = 0;
+	delete s;
 	return imageSource;
 }
 
