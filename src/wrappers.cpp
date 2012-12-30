@@ -77,7 +77,7 @@ vector<int> fMSeqGen(vector<int> coeffs)
 	// init shift registers with 1s
 	vector<int> shiftRegs;
 	shiftRegs.resize(m);
-	for (int i = 0; i < m i++)
+	for (int i = 0; i < m; i++)
 		shiftRegs[i] = 1;
 
 	int adderOut;
