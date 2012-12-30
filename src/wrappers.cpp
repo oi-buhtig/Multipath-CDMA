@@ -34,7 +34,25 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 
 void fImageSink(vector<int> bitsIn, int Q, int x, int y)
 {
+	ofstream file;
+	char * filename = "out.txt"; // name under which file will be stored
+	int fileSize = Q/8;
+	char * buffer = new char[fileSize];
+	for (int i = 0; i < fileSize; i++)
+	{
+		char tmp = 0;
+		for (int j = 0; j < 7; j++)
+		{
+			tmp += bitsIn[i*8+j];
+			tmp = tmp << 1;
+		}
+		tmp += bitsIn[i*8+7];
+		buffer[i] = tmp;
+	}
 
+	file.open(filename);
+	file.write(buffer, fileSize);
+	file.close();
 }
 
 
@@ -55,29 +73,33 @@ struct fImageSourceStruct fImageSource(string filename, int P)
 		if (i >= bufferSize) break;
 	}
 
+	file.close();
+
 	for (; i < bufferSize; i++)
 		buffer[i] = 0;
 
 	// decompose into single bits
 	imageSource.bitsOut.resize(P);
-
-
 	for (int i = 0; i < bufferSize; i++)
 	{
-		int tmp = (int)buffer[i];
+		char tmp = buffer[i];
+		cout << tmp << endl;
 		for (int j = 0; j < 8; j++)
 		{
-			imageSource.bitsOut[i*8+j] = tmp & 1; //extract last bit
-			tmp = tmp >> 1;
+			if (tmp & (1 << (7-j))) imageSource.bitsOut[i*8+j] = 1;
+			else imageSource.bitsOut[i*8+j] = 0;
+			//imageSource.bitsOut[i*8+j] = tmp & 1; //extract last bit
+			//tmp = tmp >> 1;
 		}
 	}
 
+	// padd with zeros
 	if (P > 8*bufferSize)
 		for (int i = 8*bufferSize; i < P; i++)
 			imageSource.bitsOut[i] = 0;
 
 	/*
-	Since it is not possible to read the x, y from pure RGB-data
+	Since it is not possible to read the x, y from pure RGB-data,
 	they're set to zero.
 	*/
 	imageSource.x = 0;
