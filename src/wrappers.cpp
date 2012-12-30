@@ -56,6 +56,11 @@ vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
 vector<int> fGoldSeq(vector<int> mseq1, vector<int> mseq2, int shift)
 {
 	vector<int> out;
+	int N_c = mseq1.size();
+	out.resize(N_c);
+
+	for(int i = 0; i < N_c; i++)
+		out[i] = (mseq1[i] + mseq2[(i+shift) % N_c]) % 2;
 	return out;
 }
 
@@ -85,7 +90,7 @@ vector<int> fMSeqGen(vector<int> coeffs)
 	// enter the loop
 	for (int i = 0; i < N_c; i++)
 	{
-		out[i] = shiftRegs[m-1];
+		out[i] = 1-2*shiftRegs[m-1];
 		adderOut = 0;
 		for (int j = m-1; j > 0; j--)
 		{
