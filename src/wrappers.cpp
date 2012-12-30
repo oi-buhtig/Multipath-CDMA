@@ -47,7 +47,7 @@ struct fImageSourceStruct fImageSource(string filename, int P)
 vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
 	vector<int> goldseq, int phi)
 {
-	vector<complex<double> > > out;
+	vector<complex<double> > out;
 	return out;
 }
 
@@ -64,5 +64,37 @@ vector<int> fGoldSeq(vector<int> mseq1, vector<int> mseq2, int shift)
 vector<int> fMSeqGen(vector<int> coeffs)
 {
 	vector<int> out;
+	int m = coeffs.size() - 1;
+
+	// Compute N_c = 2^m - 1
+	int N_c = 1;
+	for (int i = 0;  i < m; i++)
+		N_c *= 2;
+	N_c--;
+
+	out.resize(N_c);
+
+	// init shift registers with 1s
+	vector<int> shiftRegs;
+	shiftRegs.resize(m);
+	for (int i = 0; i < m i++)
+		shiftRegs[i] = 1;
+
+	int adderOut;
+
+	// enter the loop
+	for (int i = 0; i < N_c; i++)
+	{
+		out[i] = shiftRegs[m-1];
+		adderOut = 0;
+		for (int j = m-1; j > 0; j--)
+		{
+			if (coeffs[j+1]) adderOut += shiftRegs[j];
+			shiftRegs[j] = shiftRegs[j-1];
+		}
+		adderOut %= 2;
+		shiftRegs[0] = adderOut;
+	}
+
 	return out;
 }
