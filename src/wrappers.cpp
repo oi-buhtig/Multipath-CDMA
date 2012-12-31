@@ -4,10 +4,37 @@
 #include <iostream>
 #include <cmath>
 
-vector<int> fDSQPSKDemodulator(vector<int> symbolsIn,
+vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 	vector<int> GoldSeq, int phi)
 {
 	vector<int> out;
+	int outLength = 2 * symbolsIn.size() / GoldSeq.size();
+	out.resize(outLength);
+
+	for (int i = 0; i < outLength/2; i++)
+	{
+		// compute the average real and imaginary part
+		complex<double> sum(0.0,0.0);
+		for (int k = 0; k < GoldSeq.size(); k++)
+		{
+			complex<double> pmVal(GoldSeq[k],0.0);
+			sum += symbolsIn[i*GoldSeq.size()+k] * pmVal;
+		}
+		double evenAv = sum.real() / GoldSeq.size();
+		double oddAv = sum.imag() / GoldSeq.size();
+
+		// decide for the one with the lowest distance
+		if ((evenAv-1.0)*(evenAv-1.0) < (evenAv+1.0)*(evenAv+1.0))
+			out[2*i] = 1;
+		else
+			out[2*i] = 0;
+
+		if ((oddAv-1.0)*(oddAv-1.0) < (oddAv+1.0)*(oddAv+1.0))
+			out[2*i+1] = 1;
+		else
+			out[2*i+1] = 0;
+	}
+
 	return out;
 }
 
@@ -126,6 +153,7 @@ vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
 	// move odd bits to imaginary part, even bits to real part
 	for (int i = 0; i < inLength; i++)
 	{
+		if (!bitsIn[i]) bitsIn[i] = -1;
 		complex<double> bit(bitsIn[i],0.0);
 		if (i%2) tmp[i/2] += j*bit;
 		else tmp[i/2] += bit;

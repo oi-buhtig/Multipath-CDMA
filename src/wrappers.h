@@ -5,7 +5,7 @@
 
 using namespace std;
 
-vector<int> fDSQPSKDemodulator(vector<int> symbolsIn,
+vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 	vector<int> GoldSeq, int phi);
 
 

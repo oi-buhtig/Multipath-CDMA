@@ -14,13 +14,15 @@ int main(void)
 	poly[2] = 1;
 	poly[3] = 1;
 	vector<int> blub = fMSeqGen(poly);
-	vector<complex<double> > signal = fDSQPSKModulator(is.bitsOut, blub, 5);
+	vector<complex<double> > signal = fDSQPSKModulator(is.bitsOut, blub, 0);
 
 	for ( int i = 0; i < signal.size(); i++)
 		cout << signal[i] << endl;
 
 	cout << endl << endl;
 
- 	fImageSink(is.bitsOut, 80, 0, 0);
+	vector<int> res = fDSQPSKDemodulator(signal, blub, 0);
+
+ 	fImageSink(res, 80, 0, 0);
 	return 0;
 }
