@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <iostream>
+#include <cmath>
 
 vector<int> fDSQPSKDemodulator(vector<int> symbolsIn,
 	vector<int> GoldSeq, int phi)
@@ -112,7 +113,32 @@ struct fImageSourceStruct fImageSource(string filename, int P)
 vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
 	vector<int> goldseq, int phi)
 {
-	vector<complex<double> > out;
+	// imaginary unit
+	complex<double> j(0.0,1.0);
+
+	int inLength = bitsIn.size();
+	vector<complex<double> > tmp(inLength/2 + inLength%2, 0);
+
+	int outLength = tmp.size() * goldseq.size();
+	vector<complex<double> > out(outLength, 0);
+
+	// create new bit vector
+	// move odd bits to imaginary part, even bits to real part
+	for (int i = 0; i < inLength; i++)
+	{
+		complex<double> bit(bitsIn[i],0.0);
+		if (i%2) tmp[i/2] += j*bit;
+		else tmp[i/2] += bit;
+	}
+
+	complex<double> phase(cos(phi*2*3.14159/360),sin(phi*2*3.14159/360));
+
+	// spread with pn-code and multiply with exp(j*phi)
+	for (int i = 0; i < outLength; i++)
+	{
+		complex<double> pnVal(goldseq[i%goldseq.size()], 0.0);
+		out[i] = phase * tmp[i/goldseq.size()] * pnVal;
+	}
 	return out;
 }
 
