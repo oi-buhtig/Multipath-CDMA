@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <random>
 
 vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 	vector<int> GoldSeq, int phi)
@@ -51,11 +52,44 @@ struct fChannelEstimationStruct fChannelEstimation(
 
 vector<vector<complex<double> > > fChannel(vector<int> paths,
 	vector<vector<complex<int> > > symbolsIn, vector<int> delay,
-	vector<int> beta, vector<struct DOAStruct> DOA, double SNR,
+	vector<complex<double> > beta, vector<struct DOAStruct> DOA, double SNR,
 	vector<vector<double> > array)
 {
-	vector<vector<complex<double> > > channel;
-	return channel;
+	double stdDev = 1.0; // to be adjusted
+	normal_distribution<double> derGauss(0.0, stdDev);
+
+	vector<vector<complex<double> > > out;
+
+	// find length of longest message
+	int longestMsg = 0;
+	for (int i = 0; i < symbolsIn.size(); i++)
+		if (symbolsIn[i].size() > longest) longestMsg = symbolsIn[i].size();
+
+	// find maximum delay
+	int maxDelay = 0;
+	for (int i = 0; i < delay.size(); i++)
+		if (delay[i] > maxDelay) maxDelay = delay[i];
+
+	// for now, we'll be operating with one output
+	int outLength = longestMsg;
+	int nInputs = symbolsIn.size(); // number of inputs
+	out.resize(1);
+	out[0].resize(outLength);
+
+	for (int i = 0; i < outLength; i++)
+	{
+		out[0][i] = complex<double>(0.0,0.0);
+		for (int k = 0; k < nInputs; i++)
+		{
+			out[0][i] += beta[k]*symbolsIn[k][(i+delay[k]) % outLength];
+		}
+		double noise;
+		noise << derGauss;
+		complex<double> cNoice(noise, 0.0);
+		out[0][i] += cNoise;
+	}
+
+	return out;
 }
 
 

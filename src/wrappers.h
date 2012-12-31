@@ -28,7 +28,7 @@ struct DOAStruct
 
 vector<vector<complex<double> > > fChannel(vector<int> paths,
 	vector<vector<complex<int> > > symbolsIn, vector<int> delay,
-	vector<int> beta, vector<struct DOAStruct> DOA, double SNR,
+	vector<complex<double> > beta, vector<struct DOAStruct> DOA, double SNR,
 	vector<vector<double> > array);
 
 void fImageSink(vector<int> bitsIn, int Q, int x, int y);
