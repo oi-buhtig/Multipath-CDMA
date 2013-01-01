@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <random>
+#include <chrono>
 
 vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 	vector<int> GoldSeq, int phi)
@@ -51,10 +52,14 @@ struct fChannelEstimationStruct fChannelEstimation(
 
 
 vector<vector<complex<double> > > fChannel(vector<int> paths,
-	vector<vector<complex<int> > > symbolsIn, vector<int> delay,
+	vector<vector<complex<double> > > symbolsIn, vector<int> delay,
 	vector<complex<double> > beta, vector<struct DOAStruct> DOA, double SNR,
 	vector<vector<double> > array)
 {
+  	// make random generator engine
+  	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  	std::default_random_engine generator (seed);
+	
 	double stdDev = 1.0; // to be adjusted
 	normal_distribution<double> derGauss(0.0, stdDev);
 
@@ -63,7 +68,7 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 	// find length of longest message
 	int longestMsg = 0;
 	for (int i = 0; i < symbolsIn.size(); i++)
-		if (symbolsIn[i].size() > longest) longestMsg = symbolsIn[i].size();
+		if (symbolsIn[i].size() > longestMsg) longestMsg = symbolsIn[i].size();
 
 	// find maximum delay
 	int maxDelay = 0;
@@ -84,8 +89,8 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 			out[0][i] += beta[k]*symbolsIn[k][(i+delay[k]) % outLength];
 		}
 		double noise;
-		noise << derGauss;
-		complex<double> cNoice(noise, 0.0);
+		noise = derGauss(generator);
+		complex<double> cNoise(noise, 0.0);
 		out[0][i] += cNoise;
 	}
 

@@ -27,7 +27,7 @@ struct DOAStruct
 };
 
 vector<vector<complex<double> > > fChannel(vector<int> paths,
-	vector<vector<complex<int> > > symbolsIn, vector<int> delay,
+	vector<vector<complex<double> > > symbolsIn, vector<int> delay,
 	vector<complex<double> > beta, vector<struct DOAStruct> DOA, double SNR,
 	vector<vector<double> > array);
 

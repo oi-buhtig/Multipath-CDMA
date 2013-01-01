@@ -14,13 +14,24 @@ int main(void)
 	poly[2] = 1;
 	poly[3] = 1;
 	vector<int> blub = fMSeqGen(poly);
-	vector<complex<double> > signal = fDSQPSKModulator(is.bitsOut, blub, 0);
-
-	for ( int i = 0; i < signal.size(); i++)
-		cout << signal[i] << endl;
+	vector<complex<double> > channelIn = fDSQPSKModulator(is.bitsOut, blub, 0);
 
 	cout << endl << endl;
 
+	vector<int> paths(1, 1);
+	vector<vector<complex<double> > > totChannelIn;
+	totChannelIn.push_back(channelIn);
+
+	vector<int> delay(1,0);
+	complex<double> beta0(1.0, 0.0);
+	vector<complex<double> > beta(1, beta0);
+
+	vector<struct DOAStruct> DOA;
+	double SNR = 0.0;
+	vector<vector<double> > array;
+
+	vector<vector<complex<double> > > channelOut = fChannel(
+		paths, totChannelIn, delay, beta, DOA, SNR, array);
 	vector<int> res = fDSQPSKDemodulator(signal, blub, 0);
 
  	fImageSink(res, 80, 0, 0);
