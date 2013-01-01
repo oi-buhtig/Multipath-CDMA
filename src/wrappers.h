@@ -9,22 +9,24 @@ vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 	vector<int> GoldSeq, int phi);
 
 
+struct DOAStruct
+{
+	int azimuth;
+	int elevation;
+};
+
 struct fChannelEstimationStruct
 {
 	vector<int> delay_estimate;
-	vector<int> DOA_estimate;
-	vector<int> beta_estimate;
+	vector<struct DOAStruct> DOA_estimate;
+	vector<double> beta_estimate;
 };
 
 struct fChannelEstimationStruct fChannelEstimation(
 	vector<complex<double> > symbolsIn, vector<int>	goldseq);
 
 
-struct DOAStruct
-{
-	int azimuth;
-	int elevation;
-};
+
 
 vector<vector<complex<double> > > fChannel(vector<int> paths,
 	vector<vector<complex<double> > > symbolsIn, vector<int> delay,

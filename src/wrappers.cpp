@@ -45,13 +45,31 @@ vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 struct fChannelEstimationStruct fChannelEstimation(
 	vector<complex<double> > symbolsIn, vector<int>	goldseq)
 {
+	//function works only for single path right now
 	struct fChannelEstimationStruct channelEstimation;
 
-	//estimate delay
-	for (int i = 0; i < goldseq.size(); i++)
+	// estimate delay
+	int estimatedDelay;
+	double maxAutoCorr = 0.0;
+	for (int delay = 0; delay < goldseq.size(); delay++)
 	{
-		
+		complex<double> autoCorr(0.0, 0.0);
+		for (int i = 0; i < goldseq.size(); i++)
+		{
+			complex<double> cChip((double)goldseq[i], 0.0);
+			autoCorr += cChip * symbolsIn[(i + delay) % goldseq.size()];
+		}
+
+		if (abs(autoCorr) > maxAutoCorr)
+		{
+			maxAutoCorr = abs(autoCorr);
+			estimatedDelay = delay;
+		}
 	}
+	channelEstimation.delay_estimate.push_back(estimatedDelay);
+
+	// estimate beta
+	channelEstimation.beta_estimate.push_back(maxAutoCorr / goldseq.size() / sqrt(2.0));
 
 	return channelEstimation;
 }
