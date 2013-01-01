@@ -46,6 +46,13 @@ struct fChannelEstimationStruct fChannelEstimation(
 	vector<complex<double> > symbolsIn, vector<int>	goldseq)
 {
 	struct fChannelEstimationStruct channelEstimation;
+
+	//estimate delay
+	for (int i = 0; i < goldseq.size(); i++)
+	{
+		
+	}
+
 	return channelEstimation;
 }
 
@@ -56,14 +63,20 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 	vector<complex<double> > beta, vector<struct DOAStruct> DOA, double SNR,
 	vector<vector<double> > array)
 {
+	vector<vector<complex<double> > > out;
+
+
   	// make random generator engine
   	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  	std::default_random_engine generator (seed);
+  	std::default_random_engine generator(seed);
 	
-	double stdDev = 1.0; // to be adjusted
+	// create a gaussian random number generator according to specified SNR
+	double stdDev = sqrt(2/ pow(10.0,0.1*SNR) );
 	normal_distribution<double> derGauss(0.0, stdDev);
 
-	vector<vector<complex<double> > > out;
+cout << "stdDev = " << stdDev << endl;
+for (int i = 0; i < 10; i++)
+	cout << derGauss(generator) << endl;
 
 	// find length of longest message
 	int longestMsg = 0;
@@ -84,10 +97,11 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 	for (int i = 0; i < outLength; i++)
 	{
 		out[0][i] = complex<double>(0.0,0.0);
-		for (int k = 0; k < nInputs; i++)
+		for (int k = 0; k < nInputs; k++)
 		{
 			out[0][i] += beta[k]*symbolsIn[k][(i+delay[k]) % outLength];
 		}
+
 		double noise;
 		noise = derGauss(generator);
 		complex<double> cNoise(noise, 0.0);
@@ -150,7 +164,6 @@ struct fImageSourceStruct fImageSource(string filename, int P)
 	for (int i = 0; i < bufferSize; i++)
 	{
 		char tmp = buffer[i];
-		cout << tmp << endl;
 		for (int j = 0; j < 8; j++)
 		{
 			if (tmp & (1 << (7-j))) imageSource.bitsOut[i*8+j] = 1;

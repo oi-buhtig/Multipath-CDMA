@@ -27,12 +27,23 @@ int main(void)
 	vector<complex<double> > beta(1, beta0);
 
 	vector<struct DOAStruct> DOA;
-	double SNR = 0.0;
+	double SNR = 40.0;
 	vector<vector<double> > array;
+
+	cout << "size= " << totChannelIn[0].size() << endl;
+	for (int i = 0; i < totChannelIn[0].size(); i++)
+		cout << "no " << i << totChannelIn[0][i] << ", " << endl;
 
 	vector<vector<complex<double> > > channelOut = fChannel(
 		paths, totChannelIn, delay, beta, DOA, SNR, array);
-	vector<int> res = fDSQPSKDemodulator(signal, blub, 0);
+
+
+	cout << endl << endl;
+	for (int i = 0; i < channelOut[0].size(); i++)
+		cout << "no " << i << channelOut[0][i] << ", " << endl;
+	cout << endl << endl;
+
+	vector<int> res = fDSQPSKDemodulator(channelOut[0], blub, 0);
 
  	fImageSink(res, 80, 0, 0);
 	return 0;
