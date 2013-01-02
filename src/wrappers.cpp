@@ -6,11 +6,15 @@
 #include <random>
 #include <chrono>
 
-vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
-	vector<int> GoldSeq, int phi)
+vector<int> fDSQPSKDemodulator(
+	vector<vector<complex<double> > > symbolsIn,
+	struct fChannelEstimationStruct channelEstimation,
+	vector<int> GoldSeq,
+	double phi)
 {
 	vector<int> out;
-	int outLength = 2 * symbolsIn.size() / GoldSeq.size();
+	int inLength = symbolsIn[0].size();
+	int outLength = 2 * symbolsIn[0].size() / GoldSeq.size();
 	out.resize(outLength);
 
 	for (int i = 0; i < outLength/2; i++)
@@ -20,7 +24,13 @@ vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 		for (int k = 0; k < GoldSeq.size(); k++)
 		{
 			complex<double> pmVal(GoldSeq[k],0.0);
-			sum += symbolsIn[i*GoldSeq.size()+k] * pmVal;
+			sum += symbolsIn[0][
+				(i*GoldSeq.size()+k+channelEstimation.delay_estimate[0])
+				% inLength] * pmVal;
+
+			//cout << "le " << symbolsIn[0][
+			//	(i*GoldSeq.size()+k+channelEstimation.delay_estimate[0])
+			//	% inLength] * pmVal << endl;			
 		}
 		double evenAv = sum.real() / GoldSeq.size();
 		double oddAv = sum.imag() / GoldSeq.size();
@@ -43,9 +53,9 @@ vector<int> fDSQPSKDemodulator(vector<complex<double> > symbolsIn,
 
 
 struct fChannelEstimationStruct fChannelEstimation(
-	vector<complex<double> > symbolsIn, vector<int>	goldseq)
+	vector<vector<complex<double> > > symbolsIn, vector<int> goldseq)
 {
-	//function works only for single path right now
+	//function works only for single path and single antenna right now
 	struct fChannelEstimationStruct channelEstimation;
 
 	// estimate delay
@@ -57,7 +67,7 @@ struct fChannelEstimationStruct fChannelEstimation(
 		for (int i = 0; i < goldseq.size(); i++)
 		{
 			complex<double> cChip((double)goldseq[i], 0.0);
-			autoCorr += cChip * symbolsIn[(i + delay) % goldseq.size()];
+			autoCorr += cChip * symbolsIn[0][(i + delay) % goldseq.size()];
 		}
 
 		if (abs(autoCorr) > maxAutoCorr)
@@ -67,6 +77,7 @@ struct fChannelEstimationStruct fChannelEstimation(
 		}
 	}
 	channelEstimation.delay_estimate.push_back(estimatedDelay);
+
 
 	// estimate beta
 	channelEstimation.beta_estimate.push_back(maxAutoCorr / goldseq.size() / sqrt(2.0));
@@ -92,10 +103,6 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 	double stdDev = sqrt(2/ pow(10.0,0.1*SNR) );
 	normal_distribution<double> derGauss(0.0, stdDev);
 
-cout << "stdDev = " << stdDev << endl;
-for (int i = 0; i < 10; i++)
-	cout << derGauss(generator) << endl;
-
 	// find length of longest message
 	int longestMsg = 0;
 	for (int i = 0; i < symbolsIn.size(); i++)
@@ -117,7 +124,7 @@ for (int i = 0; i < 10; i++)
 		out[0][i] = complex<double>(0.0,0.0);
 		for (int k = 0; k < nInputs; k++)
 		{
-			out[0][i] += beta[k]*symbolsIn[k][(i+delay[k]) % outLength];
+			out[0][i] += beta[k]*symbolsIn[k][(i+outLength-delay[k]) % outLength];
 		}
 
 		double noise;
@@ -131,11 +138,11 @@ for (int i = 0; i < 10; i++)
 
 
 
-void fImageSink(vector<int> bitsIn, int Q, int x, int y)
+void fImageSink(vector<int> bitsIn, string path)
 {
 	ofstream file;
-	char * filename = "out.txt"; // name under which file will be stored
-	int fileSize = Q/8;
+	char * filename = (char *)path.c_str();
+	int fileSize = bitsIn.size()/8;
 	char * buffer = new char[fileSize];
 	for (int i = 0; i < fileSize; i++)
 	{
@@ -155,60 +162,47 @@ void fImageSink(vector<int> bitsIn, int Q, int x, int y)
 }
 
 
-
-struct fImageSourceStruct fImageSource(string filename, int P)
+// help function to get file size. From stackoverflow.com.
+std::ifstream::pos_type filesize(const char* filename)
 {
-	struct fImageSourceStruct imageSource;
+    std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
+    in.seekg(0, std::ifstream::end);
+    return in.tellg(); 
+}
+
+vector<int> fImageSource(string filename)
+{
+	vector<int> bitsOut;
 
 	ifstream file;
 	file.open((char *)filename.c_str());
-	int bufferSize = P/8;
-	char * buffer = new char[bufferSize];
-	int i = 0;
-	// read file
-	while (!file.eof())
-	{
-		file >> buffer[i++];
-		if (i >= bufferSize) break;
-	}
+	int bufferSize = filesize((char *)filename.c_str());
 
+	char * buffer = new char[bufferSize];
+
+	// read file
+	file.read(buffer, bufferSize);
 	file.close();
 
-	for (; i < bufferSize; i++)
-		buffer[i] = 0;
-
 	// decompose into single bits
-	imageSource.bitsOut.resize(P);
+	bitsOut.resize(bufferSize*8);
 	for (int i = 0; i < bufferSize; i++)
 	{
 		char tmp = buffer[i];
 		for (int j = 0; j < 8; j++)
 		{
-			if (tmp & (1 << (7-j))) imageSource.bitsOut[i*8+j] = 1;
-			else imageSource.bitsOut[i*8+j] = 0;
-			//imageSource.bitsOut[i*8+j] = tmp & 1; //extract last bit
-			//tmp = tmp >> 1;
+			if (tmp & (1 << (7-j))) bitsOut[i*8+j] = 1;
+			else bitsOut[i*8+j] = 0;
 		}
 	}
 
-	// padd with zeros
-	if (P > 8*bufferSize)
-		for (int i = 8*bufferSize; i < P; i++)
-			imageSource.bitsOut[i] = 0;
-
-	/*
-	Since it is not possible to read the x, y from pure RGB-data,
-	they're set to zero.
-	*/
-	imageSource.x = 0;
-	imageSource.y = 0;
-	return imageSource;
+	return bitsOut;
 }
 
 
 
 vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
-	vector<int> goldseq, int phi)
+	vector<int> goldseq, double phi)
 {
 	// imaginary unit
 	complex<double> j(0.0,1.0);
@@ -249,7 +243,7 @@ vector<int> fGoldSeq(vector<int> mseq1, vector<int> mseq2, int shift)
 	out.resize(N_c);
 
 	for(int i = 0; i < N_c; i++)
-		out[i] = (mseq1[i] + mseq2[(i+shift) % N_c]) % 2;
+		out[i] = -1 + 2*((mseq1[i] + mseq2[(i+shift) % N_c]) % 2);
 	return out;
 }
 
@@ -279,7 +273,7 @@ vector<int> fMSeqGen(vector<int> coeffs)
 	// enter the loop
 	for (int i = 0; i < N_c; i++)
 	{
-		out[i] = 1-2*shiftRegs[m-1];
+		out[i] = shiftRegs[m-1];
 		adderOut = 0;
 		for (int j = m-1; j > 0; j--)
 		{
