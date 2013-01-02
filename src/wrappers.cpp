@@ -24,9 +24,11 @@ vector<int> fDSQPSKDemodulator(
 		for (int k = 0; k < GoldSeq.size(); k++)
 		{
 			complex<double> pmVal(GoldSeq[k],0.0);
+			complex<double> phase(cos(phi*2*3.14159/360),sin(phi*2*3.14159/360));
+
 			sum += symbolsIn[0][
 				(i*GoldSeq.size()+k+channelEstimation.delay_estimate[0])
-				% inLength] * pmVal;
+				% inLength] / phase * pmVal;
 
 			//cout << "le " << symbolsIn[0][
 			//	(i*GoldSeq.size()+k+channelEstimation.delay_estimate[0])
@@ -108,11 +110,6 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 	for (int i = 0; i < symbolsIn.size(); i++)
 		if (symbolsIn[i].size() > longestMsg) longestMsg = symbolsIn[i].size();
 
-	// find maximum delay
-	int maxDelay = 0;
-	for (int i = 0; i < delay.size(); i++)
-		if (delay[i] > maxDelay) maxDelay = delay[i];
-
 	// for now, we'll be operating with one output
 	int outLength = longestMsg;
 	int nInputs = symbolsIn.size(); // number of inputs
@@ -124,7 +121,7 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 		out[0][i] = complex<double>(0.0,0.0);
 		for (int k = 0; k < nInputs; k++)
 		{
-			out[0][i] += beta[k]*symbolsIn[k][(i+outLength-delay[k]) % outLength];
+			out[0][i] += beta[k]*symbolsIn[k][(i+symbolsIn[k].size()-delay[k]) % symbolsIn[k].size()];
 		}
 
 		double noise;
