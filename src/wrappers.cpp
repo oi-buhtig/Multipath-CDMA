@@ -128,9 +128,6 @@ void fImageSink(vector<int> bitsIn, string path, int fileSize)
 {
 	ofstream file;
 	char * filename = (char *)path.c_str();
-	//int fileSize = bitsIn.size()/8;
-cout << "fileSize = " << fileSize << endl;
-
 	char * buffer = new char[fileSize];
 	for (int i = 0; i < fileSize; i++)
 	{
@@ -142,18 +139,12 @@ cout << "fileSize = " << fileSize << endl;
 		}
 		tmp += bitsIn[i*8+7];
 		buffer[i] = tmp;
-//cout << "wrote bit " << i << endl;
 	}
 
 
 	file.open(filename);
-
-	for (int i = 0; i < fileSize; i++)
-	{
-		file.write(buffer+i, 1);
-	}
+	file.write(buffer, fileSize);
 	file.close();
-	cout << "fileSizeAfter = " << filesize((char*)path.c_str()) << endl;
 }
 
 

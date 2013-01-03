@@ -42,8 +42,8 @@ int main(void)
 	// perform the DS-QPSK modulation
 	vector<vector<complex<double> > > channelIn;
 	channelIn.push_back(fDSQPSKModulator(source, goldSeq, phi));
-	//channelIn.push_back(fDSQPSKModulator(spam1, goldSeqMAI1, phi));
-	//channelIn.push_back(fDSQPSKModulator(spam2, goldSeqMAI2, phi));
+	channelIn.push_back(fDSQPSKModulator(spam1, goldSeqMAI1, phi));
+	channelIn.push_back(fDSQPSKModulator(spam2, goldSeqMAI2, phi));
 
 	// set up channel parameters
 	vector<int> paths(3, 1);
@@ -89,8 +89,6 @@ int main(void)
 	// task-1b, receiver starts here
 	// estimate channel parameters
 	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq);
-	cout << "delay " << est.delay_estimate[0] << endl;
-	cout << "beta " << est.beta_estimate[0] << endl;
 
 	// demodulate signal
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
