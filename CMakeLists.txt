@@ -4,4 +4,4 @@ add_executable (task1
 	src/task1.cpp
 	src/wrappers.cpp
 	)
-ADD_DEFINITIONS("-std=c++11")
+#ADD_DEFINITIONS("-std=c++11")

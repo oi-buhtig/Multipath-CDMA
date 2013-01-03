@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
-#include <random>
-#include <chrono>
+//#include <random>
+#include "utils.h"
 
 vector<int> fDSQPSKDemodulator(
 	vector<vector<complex<double> > > symbolsIn,
@@ -96,14 +96,8 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 {
 	vector<vector<complex<double> > > out;
 
-
-  	// make random generator engine
-  	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  	std::default_random_engine generator(seed);
-	
-	// create a gaussian random number generator according to specified SNR
+	// compute the standard deviation for gaussian random numbers
 	double stdDev = sqrt(2/ pow(10.0,0.1*SNR) );
-	normal_distribution<double> derGauss(0.0, stdDev);
 
 	// find length of longest message
 	int longestMsg = 0;
@@ -125,9 +119,8 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 		}
 
 		double noise;
-		noise = derGauss(generator);
-		complex<double> cNoise(noise, 0.0);
-		out[0][i] += cNoise;
+
+		out[0][i] += whiteGaussianNoise(0.0, stdDev);
 	}
 
 	return out;
@@ -159,13 +152,6 @@ void fImageSink(vector<int> bitsIn, string path)
 }
 
 
-// help function to get file size. From stackoverflow.com.
-std::ifstream::pos_type filesize(const char* filename)
-{
-    std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
-    in.seekg(0, std::ifstream::end);
-    return in.tellg(); 
-}
 
 vector<int> fImageSource(string filename)
 {

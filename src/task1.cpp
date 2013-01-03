@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <time.h>
+#include <cstdlib>
 #include "wrappers.h"
 
 using namespace std;
@@ -7,6 +9,11 @@ using namespace std;
 int main(void)
 {
 	cout << "Task 1\n";
+	
+	// initialize the random seed
+	srand(time(NULL));
+
+
 
 	// task-1a, system simulation starts here
 	// read source file
