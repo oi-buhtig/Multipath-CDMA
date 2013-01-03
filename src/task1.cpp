@@ -20,9 +20,9 @@ int main(void)
 	double phi = 0.0;//1*19 + 2*19; // S is the nineteenth letter in the alphabet
 	int fileSize;
 	int garbage;
-	vector<int> source = fImageSource("source.txt", fileSize);
-	vector<int> spam1 = fImageSource("spam1.txt", garbage);
-	vector<int> spam2 = fImageSource("spam2.txt", garbage);
+	vector<int> source = fImageSource("../data/im0.jpg", fileSize);
+	vector<int> spam1 = fImageSource("../data/im1.jpg", garbage);
+	vector<int> spam2 = fImageSource("../data/im2.jpg", garbage);
 
 	// generate gold sequences
 	vector<int> pol1(5, 1);
@@ -96,6 +96,6 @@ int main(void)
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	fImageSink(sinkBits, "out.txt", fileSize);
+	fImageSink(sinkBits, "out.jpg", fileSize);
 	return 0;
 }

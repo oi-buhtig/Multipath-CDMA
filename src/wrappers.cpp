@@ -151,7 +151,6 @@ cout << "fileSize = " << fileSize << endl;
 	for (int i = 0; i < fileSize; i++)
 	{
 		file.write(buffer+i, 1);
-		cout << "written into file: " << file.tellp() << " after " << i << endl;
 	}
 	file.close();
 	cout << "fileSizeAfter = " << filesize((char*)path.c_str()) << endl;
