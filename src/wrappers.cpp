@@ -187,6 +187,8 @@ vector<int> fImageSource(string filename)
 vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
 	vector<int> goldseq, double phi)
 {
+
+cout << "modul\n";
 	// imaginary unit
 	complex<double> j(0.0,1.0);
 

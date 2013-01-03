@@ -9,7 +9,7 @@ using namespace std;
 int main(void)
 {
 	cout << "Task 1\n";
-	
+
 	// initialize the random seed
 	srand(time(NULL));
 
@@ -19,9 +19,9 @@ int main(void)
 	// read source file
 	double phi = 1*19 + 2*19; // S is the nineteenth letter in the alphabet
 
-	vector<int> source = fImageSource("source.jpg");
-	vector<int> spam1 = fImageSource("spam1.jpg");
-	vector<int> spam2 = fImageSource("spam2.jpg");
+	vector<int> source = fImageSource("source.txt");
+	vector<int> spam1 = fImageSource("spam1.txt");
+	vector<int> spam2 = fImageSource("spam2.txt");
 
 	// generate gold sequences
 	vector<int> pol1(5, 1);
@@ -94,6 +94,6 @@ int main(void)
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	fImageSink(sinkBits, "out.jpg");
+	fImageSink(sinkBits, "out.txt");
 	return 0;
 }
