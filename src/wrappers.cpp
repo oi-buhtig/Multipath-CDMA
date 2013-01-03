@@ -28,11 +28,7 @@ vector<int> fDSQPSKDemodulator(
 
 			sum += symbolsIn[0][
 				(i*GoldSeq.size()+k+channelEstimation.delay_estimate[0])
-				% inLength] / phase * pmVal;
-
-			//cout << "le " << symbolsIn[0][
-			//	(i*GoldSeq.size()+k+channelEstimation.delay_estimate[0])
-			//	% inLength] * pmVal << endl;			
+				% inLength] / phase * pmVal;		
 		}
 		double evenAv = sum.real() / GoldSeq.size();
 		double oddAv = sum.imag() / GoldSeq.size();
@@ -59,6 +55,7 @@ struct fChannelEstimationStruct fChannelEstimation(
 {
 	//function works only for single path and single antenna right now
 	struct fChannelEstimationStruct channelEstimation;
+	int length = symbolsIn[0].size();
 
 	// estimate delay
 	int estimatedDelay;
@@ -69,7 +66,7 @@ struct fChannelEstimationStruct fChannelEstimation(
 		for (int i = 0; i < goldseq.size(); i++)
 		{
 			complex<double> cChip((double)goldseq[i], 0.0);
-			autoCorr += cChip * symbolsIn[0][(i + delay) % goldseq.size()];
+			autoCorr += cChip * symbolsIn[0][(i + delay) % length];		
 		}
 
 		if (abs(autoCorr) > maxAutoCorr)
@@ -79,7 +76,6 @@ struct fChannelEstimationStruct fChannelEstimation(
 		}
 	}
 	channelEstimation.delay_estimate.push_back(estimatedDelay);
-
 
 	// estimate beta
 	channelEstimation.beta_estimate.push_back(maxAutoCorr / goldseq.size() / sqrt(2.0));
@@ -128,11 +124,13 @@ vector<vector<complex<double> > > fChannel(vector<int> paths,
 
 
 
-void fImageSink(vector<int> bitsIn, string path)
+void fImageSink(vector<int> bitsIn, string path, int fileSize)
 {
 	ofstream file;
 	char * filename = (char *)path.c_str();
-	int fileSize = bitsIn.size()/8;
+	//int fileSize = bitsIn.size()/8;
+cout << "fileSize = " << fileSize << endl;
+
 	char * buffer = new char[fileSize];
 	for (int i = 0; i < fileSize; i++)
 	{
@@ -144,22 +142,31 @@ void fImageSink(vector<int> bitsIn, string path)
 		}
 		tmp += bitsIn[i*8+7];
 		buffer[i] = tmp;
+//cout << "wrote bit " << i << endl;
 	}
 
+
 	file.open(filename);
-	file.write(buffer, fileSize);
+
+	for (int i = 0; i < fileSize; i++)
+	{
+		file.write(buffer+i, 1);
+		cout << "written into file: " << file.tellp() << " after " << i << endl;
+	}
 	file.close();
+	cout << "fileSizeAfter = " << filesize((char*)path.c_str()) << endl;
 }
 
 
 
-vector<int> fImageSource(string filename)
+vector<int> fImageSource(string filename, int &fileSize)
 {
 	vector<int> bitsOut;
 
 	ifstream file;
 	file.open((char *)filename.c_str());
 	int bufferSize = filesize((char *)filename.c_str());
+	fileSize = bufferSize;
 
 	char * buffer = new char[bufferSize];
 
@@ -187,8 +194,6 @@ vector<int> fImageSource(string filename)
 vector<complex<double> > fDSQPSKModulator(vector<int> bitsIn,
 	vector<int> goldseq, double phi)
 {
-
-cout << "modul\n";
 	// imaginary unit
 	complex<double> j(0.0,1.0);
 
@@ -228,7 +233,7 @@ vector<int> fGoldSeq(vector<int> mseq1, vector<int> mseq2, int shift)
 	out.resize(N_c);
 
 	for(int i = 0; i < N_c; i++)
-		out[i] = -1 + 2*((mseq1[i] + mseq2[(i+shift) % N_c]) % 2);
+		out[i] = 1 - 2*((mseq1[i] + mseq2[(i+shift) % N_c]) % 2);
 	return out;
 }
 
@@ -265,9 +270,9 @@ vector<int> fMSeqGen(vector<int> coeffs)
 			if (coeffs[j+1]) adderOut += shiftRegs[j];
 			shiftRegs[j] = shiftRegs[j-1];
 		}
+		if (coeffs[1]) adderOut+= shiftRegs[0];
 		adderOut %= 2;
 		shiftRegs[0] = adderOut;
 	}
-
 	return out;
 }
