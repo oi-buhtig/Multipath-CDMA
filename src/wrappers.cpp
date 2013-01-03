@@ -51,7 +51,8 @@ vector<int> fDSQPSKDemodulator(
 
 
 struct fChannelEstimationStruct fChannelEstimation(
-	vector<vector<complex<double> > > symbolsIn, vector<int> goldseq)
+	vector<vector<complex<double> > > symbolsIn, vector<int> goldseq,
+	int numberOfDesiredPaths)
 {
 	//function works only for single path and single antenna right now
 	struct fChannelEstimationStruct channelEstimation;
@@ -85,7 +86,7 @@ struct fChannelEstimationStruct fChannelEstimation(
 
 
 
-vector<vector<complex<double> > > fChannel(vector<int> paths,
+vector<vector<complex<double> > > fChannel(
 	vector<vector<complex<double> > > symbolsIn, vector<int> delay,
 	vector<complex<double> > beta, vector<struct DOAStruct> DOA, double SNR,
 	vector<vector<double> > array)

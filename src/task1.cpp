@@ -46,8 +46,6 @@ int main(void)
 	channelIn.push_back(fDSQPSKModulator(spam2, goldSeqMAI2, phi));
 
 	// set up channel parameters
-	vector<int> paths(3, 1);
-
 	vector<int> delay;
 	delay.push_back(5);
 	delay.push_back(8);
@@ -69,7 +67,7 @@ int main(void)
 
 	// apply signals to the channel
 	vector<vector<complex<double> > > channelOut = fChannel(
-		paths, channelIn, delay, beta, DOA, SNR, array);
+		channelIn, delay, beta, DOA, SNR, array);
 
 	// point T^_1, system simulation up to the receivers input is completed
 	// channel output will therefore be stored in a file ("channelOut.txt")
@@ -88,7 +86,7 @@ int main(void)
 
 	// task-1b, receiver starts here
 	// estimate channel parameters
-	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq);
+	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq, 1);
 
 	// demodulate signal
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
