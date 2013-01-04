@@ -8,7 +8,7 @@ using namespace std;
 
 int main(void)
 {
-	cout << "Task 1\n";
+	cout << "Task 3\n";
 
 	// initialize the random seed
 	srand(time(NULL));

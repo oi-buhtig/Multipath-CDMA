@@ -16,7 +16,7 @@ add_executable (task3
 )
 
 add_executable (task4
-	src/task3.cpp
+	src/task4.cpp
 	src/wrappers.cpp
 )
 #ADD_DEFINITIONS("-std=c++11")
