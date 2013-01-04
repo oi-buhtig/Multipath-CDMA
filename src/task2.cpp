@@ -8,12 +8,16 @@
 int main(int argc, char const *argv[])
 {
 	// initialization
-	double SNR = 40.0;
-	if (argc >= 2)
-		SNR = atof(argv[1]);
+	if (argc < 6)
+	{
+		cout << "Not enough arguments provided.\n";
+		return 0;
+	}
+	double SNR = atof(argv[1]);
 	// random seed
 	srand(time(NULL));	
-	cout << "Task 2\n";
+	cout << "Task 2, SNR = " << SNR << "dB\n";
+
 
 
 
@@ -22,13 +26,9 @@ int main(int argc, char const *argv[])
 	int fileSize;
 	int garbage;
 	
-	/*vector<int> source = fImageSource("../data/t0.txt", fileSize);
-	vector<int> spam1 = fImageSource("../data/t1.txt", garbage);
-	vector<int> spam2 = fImageSource("../data/t2.txt", garbage);*/
-
-	vector<int> source = fImageSource("../data/im0.jpg", fileSize);
-	vector<int> spam1 = fImageSource("../data/im1.jpg", garbage);
-	vector<int> spam2 = fImageSource("../data/im2.jpg", garbage);
+	vector<int> source = fImageSource(argv[3], fileSize);
+	vector<int> spam1 = fImageSource(argv[4], garbage);
+	vector<int> spam2 = fImageSource(argv[5], garbage);
 
 	// generate gold sequences
 	vector<int> pol1(5, 1);
@@ -44,30 +44,14 @@ int main(int argc, char const *argv[])
 	// d >= 1 + (19+19) mod 12 -> d >= 3
 	vector<int> goldSeqMAI1 = fGoldSeq(m1, m2, 6);
 	vector<int> goldSeqMAI2 = fGoldSeq(m1, m2, 9);
-	//vector<int> pilotGoldSeq = fGoldSeq(m1, m2, 10);
 
 	// perform the DS-QPSK modulation
 	vector<vector<complex<double> > > channelIn;
-
-// dbg
-cout << "sourcelength: " << source.size() << endl;
-cout << source[0] << source[1] << source[3] << endl;
-
 
 	// since the signal s1 arrives via three paths, we push it times
 	vector<complex<double> > s1 = fDSQPSKModulator(source, goldSeq, phi);
 	for (int i = 0; i < 3; i++)
 		channelIn.push_back(s1);
-
-	/* since the receiver does not know, which bits are transmitted right
-	the start, we send a pilot signal from the same transmitter with a
-	different pn-code, sending only 1s. The estimator will then be able
-	to estimate the complex betas.
-	*/
-	/*vector<int> ones(10, 1);
-	vector<complex<double> > pilotSignal = fDSQPSKModulator(ones, pilotGoldSeq, phi);
-	for (int i = 0; i < 3; i++)
-		channelIn.push_back(pilotSignal);*/
 
 	// push the MAI-signals
 	channelIn.push_back(fDSQPSKModulator(spam1, goldSeqMAI1, phi));
@@ -138,10 +122,8 @@ cout << source[0] << source[1] << source[3] << endl;
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	if (argc == 3)
-		fImageSink(sinkBits, argv[2], fileSize);
-	else
-		fImageSink(sinkBits, "out.jpg", fileSize);
+	fImageSink(sinkBits, argv[2], fileSize);
+
 
 	return 0;
 }

@@ -9,13 +9,17 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
 	// initialization
-	double SNR = 40.0;
-	if (argc == 2)
-		SNR = atof(argv[1]);
+	if (argc < 6)
+	{
+		cout << "Not enough arguments provided.\n";
+		return 0;
+	}
+	double SNR = atof(argv[1]);
 	// random seed
 	srand(time(NULL));
 
-	cout << "Task 1\n";
+	cout << "Task 1, SNR = " << SNR << "dB\n";
+
 
 
 
@@ -25,9 +29,9 @@ int main(int argc, char const *argv[])
 	double phi = 1*19 + 2*19; // S is the nineteenth letter in the alphabet
 	int fileSize;
 	int garbage;
-	vector<int> source = fImageSource("../data/im0.jpg", fileSize);
-	vector<int> spam1 = fImageSource("../data/im1.jpg", garbage);
-	vector<int> spam2 = fImageSource("../data/im2.jpg", garbage);
+	vector<int> source = fImageSource(argv[3], fileSize);
+	vector<int> spam1 = fImageSource(argv[4], garbage);
+	vector<int> spam2 = fImageSource(argv[5], garbage);
 
 	// generate gold sequences
 	vector<int> pol1(5, 1);
@@ -110,9 +114,6 @@ int main(int argc, char const *argv[])
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	if (argc == 3)
-		fImageSink(sinkBits, argv[2], fileSize);
-	else
-		fImageSink(sinkBits, "out.jpg", fileSize);
+	fImageSink(sinkBits, argv[2], fileSize);
 	return 0;
 }

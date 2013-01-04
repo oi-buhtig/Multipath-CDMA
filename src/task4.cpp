@@ -8,9 +8,15 @@ using namespace std;
 
 vector<vector<complex<double> > > readMatrixFromFile(const char * filename);
 
-int main(void)
+int main(int argc, char const *argv[])
 {
 	// initialization
+	if (argc < 2)
+	{
+		cout << "Not enough arguments provided.\n" << endl;
+		return 0;
+	}
+
 	// random seed
 	srand(time(NULL));
 	cout << "Task 4\n";
@@ -45,16 +51,8 @@ int main(void)
 	est.beta_estimate[1] = complex<double>(0.283242719038962,0.446950570456580);
 	est.beta_estimate[2] = complex<double>(0.444941299571734,0.292659103891727);
 
-
-	/*for (int i = 0; i < 5 ; i++)
-	{
-		cout << "delay " << est.delay_estimate[i] << endl;
-		cout << "beta " << est.beta_estimate[i] << endl;
-		cout << endl;
-	}*/
-
 	vector<int> sinkBits = fDSQPSKDemodulator(Xmatrix, est, goldSeq, phi_mod);
-	fImageSinkNoPilot(sinkBits, "persMsg.txt");
+	fImageSinkNoPilot(sinkBits, argv[1]);
 
 	return 0;
 }
