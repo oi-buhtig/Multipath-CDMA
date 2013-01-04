@@ -13,8 +13,8 @@ vector<int> fDSQPSKDemodulator(
 
 struct DOAStruct
 {
-	int azimuth;
-	int elevation;
+	double azimuth;
+	double elevation;
 };
 
 struct fChannelEstimationStruct

@@ -134,21 +134,39 @@ vector<vector<complex<double> > > fChannel(
 	for (int i = 0; i < symbolsIn.size(); i++)
 		if (symbolsIn[i].size() > longestMsg) longestMsg = symbolsIn[i].size();
 
-	// for now, we'll be operating with one output
+
+
+	// compute array manifold vector
+	int nOutputs = array.size();
+	vector<complex<double> > manifold;
+	manifold.resize(nOutputs);
+	for (int i = 0; i < nOutputs; i++)
+	{
+		double scaled_phase = 0.0;
+		scaled_phase += cos(DOA[i].azimuth) * cos(DOA[i].elevation) * array[i][0];
+		scaled_phase += sin(DOA[i].azimuth) * cos(DOA[i].elevation) * array[i][1];
+		scaled_phase += sin(DOA[i].elevation) * array[i][2];
+		manifold[i] = complex<double> (cos(3.14159*scaled_phase), sin(3.14159*scaled_phase));
+	}
+
 	int outLength = longestMsg;
 	int nInputs = symbolsIn.size(); // number of inputs
-	out.resize(1);
-	out[0].resize(outLength);
+	out.resize(nOutputs);
+	for (int i = 0; i < nOutputs; i++)
+		out[i].resize(outLength);
 
 	for (int i = 0; i < outLength; i++)
 	{
-		out[0][i] = complex<double>(0.0,0.0);
+		complex<double> tmp(0.0,0.0);
+
 		for (int k = 0; k < nInputs; k++)
 		{
-			out[0][i] += beta[k]*symbolsIn[k][(i+symbolsIn[k].size()-delay[k]) % symbolsIn[k].size()];
+			tmp += beta[k]*symbolsIn[k][(i+symbolsIn[k].size()-delay[k]) % symbolsIn[k].size()];
 		}
 
-		out[0][i] += whiteGaussianNoise(0.0, stdDev);
+		tmp += whiteGaussianNoise(0.0, stdDev);
+		for (int b = 0; b < nOutputs; b++)
+			out[b][i] = tmp * manifold[b];
 	}
 
 	return out;

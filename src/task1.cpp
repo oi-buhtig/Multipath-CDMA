@@ -60,10 +60,24 @@ int main(void)
 	beta.push_back(beta3);
 
 	vector<struct DOAStruct> DOA;
+	struct DOAStruct sourceDOA;
+	sourceDOA.azimuth = 3.14159/9; // 20 degrees
+	sourceDOA.elevation = 0.0;
+	DOA.push_back(sourceDOA);
+
+	struct DOAStruct spam1DOA;
+	spam1DOA.azimuth = 3.14159/18*7; // 70 degrees
+	spam1DOA.elevation = 0.0;
+	DOA.push_back(spam1DOA);
+
+	struct DOAStruct spam2DOA;
+	spam2DOA.azimuth = 3.14159/3*2; // 120 degrees
+	spam2DOA.elevation = 0.0;
+	DOA.push_back(spam2DOA);
 	
 	double SNR = 40.0;
 	
-	vector<vector<double> > array;
+	vector<vector<double> > array(1, vector<double>(3,0.0));
 
 	// apply signals to the channel
 	vector<vector<complex<double> > > channelOut = fChannel(
