@@ -169,16 +169,6 @@ vector<vector<complex<double> > > fChannel(
 			tmp += whiteGaussianNoise(0.0, stdDev);
 			out[k][i] = tmp;
 		}
-		/*complex<double> tmp(0.0,0.0);
-
-		for (int k = 0; k < nInputs; k++)
-		{
-			tmp += beta[k]*symbolsIn[k][(i+symbolsIn[k].size()-delay[k]) % symbolsIn[k].size()];
-		}
-
-		tmp += whiteGaussianNoise(0.0, stdDev);
-		for (int b = 0; b < nOutputs; b++)
-			out[b][i] = tmp * manifold[b];*/
 	}
 
 	return out;
