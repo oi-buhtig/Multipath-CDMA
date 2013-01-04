@@ -17,6 +17,9 @@ vector<int> fDSQPSKDemodulator(
 	int outLength = 2 * symbolsIn[0].size() / GoldSeq.size();
 	out.resize(outLength);
 
+	// number of desired signal paths
+	int nPaths = channelEstimation.delay_estimate.size();
+	complex<double> cnPaths((double)nPaths, 0.0);
 	for (int i = 0; i < outLength/2; i++)
 	{
 		// compute the average real and imaginary part
@@ -26,9 +29,11 @@ vector<int> fDSQPSKDemodulator(
 			complex<double> pmVal(GoldSeq[k],0.0);
 			complex<double> phase(cos(phi*2*3.14159/360),sin(phi*2*3.14159/360));
 
+			for (int b = 0; b < nPaths; b++)
 			sum += symbolsIn[0][
-				(i*GoldSeq.size()+k+channelEstimation.delay_estimate[0])
-				% inLength] / phase * pmVal;		
+				(i*GoldSeq.size()+k+channelEstimation.delay_estimate[b])
+				% inLength]
+				/ channelEstimation.beta_estimate[b] / cnPaths / phase * pmVal;	
 		}
 		double evenAv = sum.real() / GoldSeq.size();
 		double oddAv = sum.imag() / GoldSeq.size();
@@ -61,6 +66,9 @@ struct fChannelEstimationStruct fChannelEstimation(
 	// estimate delay
 	int estimatedDelay;
 	double maxAutoCorr = 0.0;
+	channelEstimation.beta_estimate.resize(numberOfDesiredPaths,
+		complex<double>(0.0, 0.0));
+	channelEstimation.delay_estimate.resize(numberOfDesiredPaths, 0);
 	for (int delay = 0; delay < goldseq.size(); delay++)
 	{
 		complex<double> autoCorr(0.0, 0.0);
@@ -70,16 +78,41 @@ struct fChannelEstimationStruct fChannelEstimation(
 			autoCorr += cChip * symbolsIn[0][(i + delay) % length];		
 		}
 
-		if (abs(autoCorr) > maxAutoCorr)
+	cout << "delay of " << delay << " produces absbeta " << abs(autoCorr) << endl;
+
+		// keep a list of the abs-greatest beta_values and according delays
+		if (abs(autoCorr) > abs(channelEstimation.beta_estimate[
+			numberOfDesiredPaths-1]))
 		{
-			maxAutoCorr = abs(autoCorr);
-			estimatedDelay = delay;
+			channelEstimation.beta_estimate[numberOfDesiredPaths-1] = autoCorr;
+			channelEstimation.delay_estimate[numberOfDesiredPaths-1] = delay;
+			for (int i = numberOfDesiredPaths-2; i >= 0; i--)
+			{
+				if (abs(channelEstimation.beta_estimate[i]) <
+					abs(channelEstimation.beta_estimate[i+1]))
+				{
+					// swap
+					complex<double> tmp = channelEstimation.beta_estimate[i];
+					int tmp2 = channelEstimation.delay_estimate[i];
+
+					channelEstimation.beta_estimate[i] =
+						channelEstimation.beta_estimate[i+1];
+					channelEstimation.delay_estimate[i] =
+						channelEstimation.delay_estimate[i+1];
+
+					channelEstimation.beta_estimate[i+1] = tmp;
+					channelEstimation.delay_estimate[i+1] = tmp2;
+				}
+			}
 		}
 	}
-	channelEstimation.delay_estimate.push_back(estimatedDelay);
 
 	// estimate beta
-	channelEstimation.beta_estimate.push_back(maxAutoCorr / goldseq.size() / sqrt(2.0));
+	complex<double> divisor(goldseq.size(), goldseq.size());
+
+	for (int i = 0; i < numberOfDesiredPaths; i++)
+		channelEstimation.beta_estimate[i] /= divisor;
+	// since the frist two bits are pilot bits set on 1, the complex number should be 1+i
 
 	return channelEstimation;
 }
@@ -115,8 +148,6 @@ vector<vector<complex<double> > > fChannel(
 			out[0][i] += beta[k]*symbolsIn[k][(i+symbolsIn[k].size()-delay[k]) % symbolsIn[k].size()];
 		}
 
-		double noise;
-
 		out[0][i] += whiteGaussianNoise(0.0, stdDev);
 	}
 
@@ -135,10 +166,10 @@ void fImageSink(vector<int> bitsIn, string path, int fileSize)
 		char tmp = 0;
 		for (int j = 0; j < 7; j++)
 		{
-			tmp += bitsIn[i*8+j];
+			tmp += bitsIn[i*8+2+j]; // add 2 to the index in order go ignore the pilot bits
 			tmp = tmp << 1;
 		}
-		tmp += bitsIn[i*8+7];
+		tmp += bitsIn[i*8+2+7];
 		buffer[i] = tmp;
 	}
 
@@ -166,14 +197,16 @@ vector<int> fImageSource(string filename, int &fileSize)
 	file.close();
 
 	// decompose into single bits
-	bitsOut.resize(bufferSize*8);
+	bitsOut.resize(bufferSize*8+2);
+	bitsOut[0] = bitsOut[1] = 1; // add 2 pilot bits
+	// see comment in fChannelEstimator
 	for (int i = 0; i < bufferSize; i++)
 	{
 		char tmp = buffer[i];
 		for (int j = 0; j < 8; j++)
 		{
-			if (tmp & (1 << (7-j))) bitsOut[i*8+j] = 1;
-			else bitsOut[i*8+j] = 0;
+			if (tmp & (1 << (7-j))) bitsOut[i*8+2+j] = 1;
+			else bitsOut[i*8+2+j] = 0;
 		}
 	}
 

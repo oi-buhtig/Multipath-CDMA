@@ -21,7 +21,7 @@ struct fChannelEstimationStruct
 {
 	vector<int> delay_estimate;
 	vector<struct DOAStruct> DOA_estimate;
-	vector<double> beta_estimate;
+	vector<complex<double> > beta_estimate;
 };
 
 struct fChannelEstimationStruct fChannelEstimation(
