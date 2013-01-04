@@ -10,7 +10,12 @@ vector<vector<complex<double> > > readMatrixFromFile(const char * filename);
 
 int main(void)
 {
+	// initialization
+	// random seed
+	srand(time(NULL));
 	cout << "Task 4\n";
+
+
 
 	// read our matrix from the CSV-file
 	vector<vector<complex<double> > > Xmatrix = readMatrixFromFile("../data/Xmatrix.txt");
@@ -20,8 +25,36 @@ int main(void)
 
 	vector<int> pol1(6, 1);
 	vector<int> pol2(6, 1);
+	pol1[1] = 0;
+	pol1[2] = 0;
+	pol1[4] = 0;
+	pol2[1] = 0;
+	vector<int> m1 = fMSeqGen(pol1);
+	vector<int> m2 = fMSeqGen(pol2);
+	vector<int> goldSeq = fGoldSeq(m1, m2, phase_shift);
+
+	for (int i = 0; i < goldSeq.size(); i++)
+		cout << (1+goldSeq[i])/2;
+	cout << endl;
+
+	//struct fChannelEstimationStruct est = fChannelEstimation(Xmatrix, goldSeq, 3);
+	struct fChannelEstimationStruct est;
+	est.delay_estimate.resize(3, 0);
+	est.beta_estimate.resize(3);
+	est.beta_estimate[0] = complex<double>(0.406414213735189,0.520782224541765);
+	est.beta_estimate[1] = complex<double>(0.283242719038962,0.446950570456580);
+	est.beta_estimate[2] = complex<double>(0.444941299571734,0.292659103891727);
 
 
+	/*for (int i = 0; i < 5 ; i++)
+	{
+		cout << "delay " << est.delay_estimate[i] << endl;
+		cout << "beta " << est.beta_estimate[i] << endl;
+		cout << endl;
+	}*/
+
+	vector<int> sinkBits = fDSQPSKDemodulator(Xmatrix, est, goldSeq, phi_mod);
+	fImageSinkNoPilot(sinkBits, "persMsg.txt");
 
 	return 0;
 }

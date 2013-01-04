@@ -6,12 +6,16 @@
 
 using namespace std;
 
-int main(void)
+int main(int argc, char const *argv[])
 {
+	// initialization
+	double SNR = 40.0;
+	if (argc >= 2)
+		SNR = atof(argv[1]);
+	// random seed
+	srand(time(NULL));
 	cout << "Task 3\n";
 
-	// initialize the random seed
-	srand(time(NULL));
 
 
 
@@ -79,8 +83,6 @@ int main(void)
 	spam2DOA.elevation = 0.0;
 	DOA.push_back(spam2DOA);
 	
-	double SNR = 40.0;
-	
 	vector<vector<double> > array(5, vector<double>(3,0.0));
 	for (int i = 0; i < 5; i++)
 	{
@@ -109,12 +111,15 @@ int main(void)
 
 	// task-1b, receiver starts here
 	// estimate channel parameters
-	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq, 1);
+	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq, 1, phi);
 
 	// demodulate signal
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	fImageSink(sinkBits, "out.jpg", fileSize);
+	if (argc == 3)
+		fImageSink(sinkBits, argv[2], fileSize);
+	else
+		fImageSink(sinkBits, "out.jpg", fileSize);
 	return 0;
 }

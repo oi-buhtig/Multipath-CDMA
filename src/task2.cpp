@@ -5,12 +5,17 @@
 #include <cmath>
 #include <cstdlib>
 
-int main(void)
+int main(int argc, char const *argv[])
 {
+	// initialization
+	double SNR = 40.0;
+	if (argc >= 2)
+		SNR = atof(argv[1]);
+	// random seed
+	srand(time(NULL));	
 	cout << "Task 2\n";
 
-	// initialize the random seed
-	srand(time(NULL));
+
 
 	// read source file
 	double phi = 0.0;//1*19 + 2*19; // S is the nineteenth letter in the alphabet
@@ -82,18 +87,33 @@ cout << source[0] << source[1] << source[3] << endl;
 	beta[3] = complex<double>(0.06, 0.0);
 	beta[4] = complex<double>(0.05, 0.0);
 
-
-for (int i = 0; i < 8; i++)
-	cout << "delay " << i << " = " << delay[i] << endl;
-
-for (int i = 0; i < 8; i++)
-	cout << "beta " << i << " = " << beta[i] << endl;
-
 	vector<struct DOAStruct> DOA;
+	struct DOAStruct sourceDOA;
+	sourceDOA.azimuth = 3.14159/9; // 20 degrees
+	sourceDOA.elevation = 0.0;
+	DOA.push_back(sourceDOA);
 
-	double SNR = 40.0;
+	struct DOAStruct multi1DOA;
+	multi1DOA.azimuth = 3.14159/180*25; // 25 degrees
+	multi1DOA.elevation = 0.0;
+	DOA.push_back(multi1DOA);
 
-	vector<vector<double> > array;
+	struct DOAStruct multi2DOA;
+	multi2DOA.azimuth = 3.14159/180*29; // 29 degrees
+	multi2DOA.elevation = 0.0;
+	DOA.push_back(multi2DOA);
+
+	struct DOAStruct spam1DOA;
+	spam1DOA.azimuth = 3.14159/18*7; // 70 degrees
+	spam1DOA.elevation = 0.0;
+	DOA.push_back(spam1DOA);
+
+	struct DOAStruct spam2DOA;
+	spam2DOA.azimuth = 3.14159/3*2; // 120 degrees
+	spam2DOA.elevation = 0.0;
+	DOA.push_back(spam2DOA);
+	
+	vector<vector<double> > array(1, vector<double>(3,0.0));
 
 	// apply signals to the channel
 	vector<vector<complex<double> > > channelOut = fChannel(
@@ -112,47 +132,16 @@ for (int i = 0; i < 8; i++)
 		}
 	}
 
-	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq, 3);
-	for (int i = 0; i < 3; i++)
-	{
-		cout << "delay " << i << " = " << est.delay_estimate[i] << endl;
-		cout << "beta " << i << " = " << abs(est.beta_estimate[i]) << endl;
-	}
+	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq, 3, phi);
 
 	// demodulate signal
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	fImageSink(sinkBits, "out.jpg", fileSize);
-
-
-	/*cout << "crosscorrlations: " << endl;
-
-	int sum;
-	for (int i = 0; i < goldSeq.size(); i++)
-	{
-		sum = 0;
-		for (int j = 0; j < goldSeq.size(); j++)
-		{
-			sum += goldSeq[(j+i)%goldSeq.size()]*pilotGoldSeq[j];
-			//cout << "adding " << goldSeq[(j+i)%goldSeq.size()]*pilotGoldSeq[j] << endl;
-		}
-		cout << sum << endl;
-	}
-
-	cout << "autocorrlations: " << endl;
-
-	int sum1;
-	for (int i = 0; i < goldSeq.size(); i++)
-	{
-		sum1 = 0;
-		for (int j = 0; j < goldSeq.size(); j++)
-		{
-			sum1 += pilotGoldSeq[(j+i)%goldSeq.size()]*pilotGoldSeq[j];
-			//cout << "adding " << goldSeq[(j+i)%goldSeq.size()]*pilotGoldSeq[j] << endl;
-		}
-		cout << sum1 << endl;
-	}*/
+	if (argc == 3)
+		fImageSink(sinkBits, argv[2], fileSize);
+	else
+		fImageSink(sinkBits, "out.jpg", fileSize);
 
 	return 0;
 }

@@ -6,18 +6,23 @@
 
 using namespace std;
 
-int main(void)
+int main(int argc, char const *argv[])
 {
+	// initialization
+	double SNR = 40.0;
+	if (argc == 2)
+		SNR = atof(argv[1]);
+	// random seed
+	srand(time(NULL));
+
 	cout << "Task 1\n";
 
-	// initialize the random seed
-	srand(time(NULL));
 
 
 
 	// task-1a, system simulation starts here
 	// read source file
-	double phi = 0.0;//1*19 + 2*19; // S is the nineteenth letter in the alphabet
+	double phi = 1*19 + 2*19; // S is the nineteenth letter in the alphabet
 	int fileSize;
 	int garbage;
 	vector<int> source = fImageSource("../data/im0.jpg", fileSize);
@@ -75,8 +80,6 @@ int main(void)
 	spam2DOA.elevation = 0.0;
 	DOA.push_back(spam2DOA);
 	
-	double SNR = 40.0;
-	
 	vector<vector<double> > array(1, vector<double>(3,0.0));
 
 	// apply signals to the channel
@@ -100,12 +103,16 @@ int main(void)
 
 	// task-1b, receiver starts here
 	// estimate channel parameters
-	struct fChannelEstimationStruct est = fChannelEstimation(channelOut, goldSeq, 1);
+	struct fChannelEstimationStruct est = fChannelEstimation(channelOut,
+		goldSeq, 1, phi);
 
 	// demodulate signal
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	fImageSink(sinkBits, "out.jpg", fileSize);
+	if (argc == 3)
+		fImageSink(sinkBits, argv[2], fileSize);
+	else
+		fImageSink(sinkBits, "out.jpg", fileSize);
 	return 0;
 }

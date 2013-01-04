@@ -26,7 +26,7 @@ struct fChannelEstimationStruct
 
 struct fChannelEstimationStruct fChannelEstimation(
 	vector<vector<complex<double> > > symbolsIn, vector<int> goldseq,
-	int numberOfDesiredPaths);
+	int numberOfDesiredPaths, double phi);
 
 
 
@@ -37,6 +37,8 @@ vector<vector<complex<double> > > fChannel(
 	vector<vector<double> > array);
 
 void fImageSink(vector<int> bitsIn, string filname, int fileSize);
+
+void fImageSinkNoPilot(vector<int> bitsIn, string path);
 
 vector<int> fImageSource(string filename, int &fileSize);
 

@@ -38,6 +38,8 @@ vector<int> fDSQPSKDemodulator(
 		double evenAv = sum.real() / GoldSeq.size();
 		double oddAv = sum.imag() / GoldSeq.size();
 
+		// cout << evenAv*evenAv+oddAv*oddAv << endl;
+
 		// decide for the one with the lowest distance
 		if ((evenAv-1.0)*(evenAv-1.0) < (evenAv+1.0)*(evenAv+1.0))
 			out[2*i] = 1;
@@ -57,7 +59,7 @@ vector<int> fDSQPSKDemodulator(
 
 struct fChannelEstimationStruct fChannelEstimation(
 	vector<vector<complex<double> > > symbolsIn, vector<int> goldseq,
-	int numberOfDesiredPaths)
+	int numberOfDesiredPaths, double phi)
 {
 	//function works only for single path and single antenna right now
 	struct fChannelEstimationStruct channelEstimation;
@@ -109,7 +111,9 @@ struct fChannelEstimationStruct fChannelEstimation(
 	complex<double> divisor(goldseq.size(), goldseq.size());
 
 	for (int i = 0; i < numberOfDesiredPaths; i++)
-		channelEstimation.beta_estimate[i] /= divisor;
+		channelEstimation.beta_estimate[i] /= divisor
+			* complex<double>(cos(phi*2*3.14159/360),sin(phi*2*3.14159/360));
+;
 	// since the frist two bits are pilot bits set on 1, the complex number should be 1+i
 
 	return channelEstimation;
@@ -190,6 +194,32 @@ void fImageSink(vector<int> bitsIn, string path, int fileSize)
 			tmp = tmp << 1;
 		}
 		tmp += bitsIn[i*8+2+7];
+		buffer[i] = tmp;
+	}
+
+
+	file.open(filename);
+	file.write(buffer, fileSize);
+	file.close();
+}
+
+
+
+void fImageSinkNoPilot(vector<int> bitsIn, string path)
+{
+	ofstream file;
+	int fileSize = bitsIn.size()/8;
+	char * filename = (char *)path.c_str();
+	char * buffer = new char[fileSize];
+	for (int i = 0; i < fileSize; i++)
+	{
+		char tmp = 0;
+		for (int j = 0; j < 7; j++)
+		{
+			tmp += bitsIn[i*8+j]; // add 2 to the index in order go ignore the pilot bits
+			tmp = tmp << 1;
+		}
+		tmp += bitsIn[i*8+7];
 		buffer[i] = tmp;
 	}
 
