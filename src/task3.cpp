@@ -20,13 +20,13 @@ int main(void)
 	double phi = 0.0;//1*19 + 2*19; // S is the nineteenth letter in the alphabet
 	int fileSize;
 	int garbage;
-	vector<int> source = fImageSource("../data/t0.txt", fileSize);
+	/*vector<int> source = fImageSource("../data/t0.txt", fileSize);
 	vector<int> spam1 = fImageSource("../data/t1.txt", garbage);
-	vector<int> spam2 = fImageSource("../data/t2.txt", garbage);
+	vector<int> spam2 = fImageSource("../data/t2.txt", garbage);*/
 
-	/*vector<int> source = fImageSource("../data/im0.jpg", fileSize);
+	vector<int> source = fImageSource("../data/im0.jpg", fileSize);
 	vector<int> spam1 = fImageSource("../data/im1.jpg", garbage);
-	vector<int> spam2 = fImageSource("../data/im2.jpg", garbage);*/
+	vector<int> spam2 = fImageSource("../data/im2.jpg", garbage);
 
 	// generate gold sequences
 	vector<int> pol1(5, 1);
@@ -84,13 +84,9 @@ int main(void)
 	vector<vector<double> > array(5, vector<double>(3,0.0));
 	for (int i = 0; i < 5; i++)
 	{
-		array[i][0] = -cos(3.14159/6) + i*0.5*cos(3.14159/6);
-		array[i][1] = -sin(3.14159/6) + i*0.5*sin(3.14159/6);
+		array[(i+3)%5][0] = -cos(3.14159/6) + i*0.5*cos(3.14159/6);
+		array[(i+3)%5][1] = -sin(3.14159/6) + i*0.5*sin(3.14159/6);
 	}
-
-//dbg
-for (int i = 0; i < 3; i++)
-	array[0][i] = 0.0;
 
 	// apply signals to the channel
 	vector<vector<complex<double> > > channelOut = fChannel(
@@ -119,6 +115,6 @@ for (int i = 0; i < 3; i++)
 	vector<int> sinkBits = fDSQPSKDemodulator(channelOut, est, goldSeq, phi);
 
 	// save file
-	fImageSink(sinkBits, "out.txt", fileSize);
+	fImageSink(sinkBits, "out.jpg", fileSize);
 	return 0;
 }
