@@ -78,8 +78,6 @@ struct fChannelEstimationStruct fChannelEstimation(
 			autoCorr += cChip * symbolsIn[0][(i + delay) % length];		
 		}
 
-	cout << "delay of " << delay << " produces absbeta " << abs(autoCorr) << endl;
-
 		// keep a list of the abs-greatest beta_values and according delays
 		if (abs(autoCorr) > abs(channelEstimation.beta_estimate[
 			numberOfDesiredPaths-1]))
@@ -138,26 +136,40 @@ vector<vector<complex<double> > > fChannel(
 
 	// compute array manifold vector
 	int nOutputs = array.size();
-	vector<complex<double> > manifold;
-	manifold.resize(nOutputs);
+	int nInputs = symbolsIn.size(); // number of inputs
+	vector<vector<complex<double> > > manifold(nOutputs,
+		vector<complex<double> >(nInputs, complex<double>(0.0, 0.0)));
 	for (int i = 0; i < nOutputs; i++)
 	{
-		double scaled_phase = 0.0;
-		scaled_phase += cos(DOA[i].azimuth) * cos(DOA[i].elevation) * array[i][0];
-		scaled_phase += sin(DOA[i].azimuth) * cos(DOA[i].elevation) * array[i][1];
-		scaled_phase += sin(DOA[i].elevation) * array[i][2];
-		manifold[i] = complex<double> (cos(3.14159*scaled_phase), sin(3.14159*scaled_phase));
+		for (int k = 0; k < nInputs; k++)
+		{
+			double scaled_phase = 0.0;
+			scaled_phase += cos(DOA[k].azimuth) * cos(DOA[i].elevation) * array[i][0];
+			scaled_phase += sin(DOA[k].azimuth) * cos(DOA[i].elevation) * array[i][1];
+			scaled_phase += sin(DOA[k].elevation) * array[i][2];
+			manifold[i][k] = complex<double> (cos(3.14159*scaled_phase),
+				sin(3.14159*scaled_phase));
+		}
 	}
 
 	int outLength = longestMsg;
-	int nInputs = symbolsIn.size(); // number of inputs
 	out.resize(nOutputs);
 	for (int i = 0; i < nOutputs; i++)
 		out[i].resize(outLength);
 
 	for (int i = 0; i < outLength; i++)
 	{
-		complex<double> tmp(0.0,0.0);
+		for (int k = 0; k < nOutputs; k++)
+		{
+			complex<double> tmp(0.0, 0.0);
+			for (int b = 0; b < nInputs; b++)
+			{
+				tmp += beta[b]*manifold[k][b]*symbolsIn[b][(i+symbolsIn[b].size()-delay[k]) % symbolsIn[b].size()];
+			}
+			tmp += whiteGaussianNoise(0.0, stdDev);
+			out[k][i] = tmp;
+		}
+		/*complex<double> tmp(0.0,0.0);
 
 		for (int k = 0; k < nInputs; k++)
 		{
@@ -166,7 +178,7 @@ vector<vector<complex<double> > > fChannel(
 
 		tmp += whiteGaussianNoise(0.0, stdDev);
 		for (int b = 0; b < nOutputs; b++)
-			out[b][i] = tmp * manifold[b];
+			out[b][i] = tmp * manifold[b];*/
 	}
 
 	return out;
