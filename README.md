@@ -1,1 +1,1 @@
-Coursework task. Simulation of a communication channel.
+This is a project for a coursework in the EEE-department of the Imperial College London. The corresponding lecture is "EE401: Advanced Communication Theory", held by Prof. A. Manikas. The project consists of several tasks which deal with the simulation of CDMA-systems.

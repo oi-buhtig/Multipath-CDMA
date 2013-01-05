@@ -39,11 +39,6 @@ int main(int argc, char const *argv[])
 	vector<int> m2 = fMSeqGen(pol2);
 	vector<int> goldSeq = fGoldSeq(m1, m2, phase_shift);
 
-	for (int i = 0; i < goldSeq.size(); i++)
-		cout << (1+goldSeq[i])/2;
-	cout << endl;
-
-	//struct fChannelEstimationStruct est = fChannelEstimation(Xmatrix, goldSeq, 3);
 	struct fChannelEstimationStruct est;
 	est.delay_estimate.resize(3, 0);
 	est.beta_estimate.resize(3);
