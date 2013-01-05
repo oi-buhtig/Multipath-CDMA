@@ -20,11 +20,6 @@ add_executable (task4
 	src/wrappers.cpp
 )
 
-add_executable (tests
-	src/tests.cpp
-	src/wrappers.cpp
-)
-
 add_executable (bmpHeaderDataSplit
 	src/bmpHeaderDataSplit.cpp
 )
