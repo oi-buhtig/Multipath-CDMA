@@ -3,6 +3,9 @@
 #include <fstream>
 #include <cstdlib>
 #include <cmath>
+#include <complex>
+
+using namespace std;
 
 // help function to get file size. From stackoverflow.com.
 std::ifstream::pos_type filesize(const char* filename)

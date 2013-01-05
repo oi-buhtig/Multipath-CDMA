@@ -19,4 +19,16 @@ add_executable (task4
 	src/task4.cpp
 	src/wrappers.cpp
 )
-#ADD_DEFINITIONS("-std=c++11")
+
+add_executable (tests
+	src/tests.cpp
+	src/wrappers.cpp
+)
+
+add_executable (bmpHeaderDataSplit
+	src/bmpHeaderDataSplit.cpp
+)
+
+add_executable (bmpHeaderDataMerge
+	src/bmpHeaderDataMerge.cpp
+)
