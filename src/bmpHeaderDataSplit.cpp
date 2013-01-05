@@ -1,3 +1,8 @@
+/*
+This tools takes a windows bitmap and splits it into two new files,
+one containing the header, the other one containing the RGB-data.
+*/
+
 #include <iostream>
 #include <fstream>
 #include "utils.h"
